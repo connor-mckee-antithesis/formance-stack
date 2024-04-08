@@ -1,0 +1,40 @@
+version: '3.8'
+volumes:
+  postgres:
+services:
+  postgres:
+    image: "postgres:15-alpine"
+    hostname: postgres
+    container_name: postgres
+    command:
+    - -c
+    - max_connections=200
+    environment:
+      POSTGRES_USER: "ledger"
+      POSTGRES_PASSWORD: "ledger"
+      POSTGRES_DB: "ledger"
+      PGDATA: /data/postgres
+    volumes:
+    - postgres:/data/postgres
+    networks:
+      formance:
+        ipv4_address: 10.0.0.16
+
+  ledger:
+    image: formance-ledger:v2.0.0-rc.19
+    hostname: ledger
+    container_name: ledger
+    environment:
+      STORAGE_DRIVER: "postgres"
+      POSTGRES_URI: "postgresql://ledger:ledger@10.0.0.16:5432/ledger?sslmode=disable"
+      DEBUG: "true"
+    networks:
+      formance:
+        ipv4_address: 10.0.0.17
+
+networks:
+  formance:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.0.0/24
